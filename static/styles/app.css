@@ -358,6 +358,10 @@ img {
   gap: 1.5rem;
 }
 
+.dev__social > li > a > i{
+  width : 5rem;
+}
+
 .devInfo {
   margin-bottom: 3rem;
 }
