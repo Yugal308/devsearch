@@ -50,8 +50,12 @@ def registerUser(request):
     return render(request, "users/login_register.html", context)
 
 def profiles(request):
-    profiles = Profile.objects.all()
-    context = {'profiles' : profiles}
+    search_query = ''
+    if request.GET.get('search_query'):
+        search_query = request.GET.get('search_query')
+    print("SEARCH: ",search_query)
+    profiles = Profile.objects.filter(name__icontains = search_query)
+    context = {'profiles' : profiles, 'search_query': search_query}
     return render(request,'users/profiles.html',context)
 
 def userProfile(request,pk):
@@ -91,6 +95,7 @@ def createSkill(request):
             skill = form.save(commit=False)
             skill.owner = profile
             skill.save()
+            messages.success(request,"Skill was added successfully!")
             return redirect('account')
     context = {'form':form}
     return render(request, 'users/skill_form.html',context)
@@ -104,6 +109,18 @@ def updateSkill(request,pk):
         form = SkillForm(request.POST, instance=skill)
         if form.is_valid():
             form.save()
+            messages.success(request,"Skill was updated successfully!")
             return redirect('account')
     context = {'form':form}
     return render(request, 'users/skill_form.html',context)
+
+@login_required(login_url='login')
+def deleteSkill(request,pk):
+    profile = request.user.profile
+    skill = profile.skill_set.get(id = pk)
+    if request.method == 'POST':
+        skill.delete()
+        messages.success(request,"Skill was deleted successfully!"  )
+        return redirect('account')
+    context = {'object':skill}
+    return render(request,'delete_object.html',context)
